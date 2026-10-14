@@ -1,0 +1,654 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>25Dayz</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&family=Karla:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow reading column, a full-bleed hero drawn like the Rhumel gorge, and the booking card as the page's anchor */
+:root{
+  --stone:#ECEEEA; --paper:#F7F8F5; --ink:#1B2427; --muted:#5A6865; --line:#D3D8D2;
+  --river:#1E5D68; --river-ink:#FFFFFF; --brass:#A86B2E; --sky:#DCE6E4;
+  --display:"Marcellus", "Trajan Pro", Georgia, serif;
+  --body:"Karla", "Helvetica Neue", Arial, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --stone:#121819; --paper:#192123; --ink:#E6EAE7; --muted:#9AA8A5; --line:#2C3739;
+  --river:#5FB0BC; --river-ink:#0B1416; --brass:#D49A5C; --sky:#1C2B2E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --stone:#121819; --paper:#192123; --ink:#E6EAE7; --muted:#9AA8A5; --line:#2C3739;
+  --river:#5FB0BC; --river-ink:#0B1416; --brass:#D49A5C; --sky:#1C2B2E; color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--stone);color:var(--ink);font:400 17px/1.6 var(--body)}
+.wrap{max-width:1080px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;text-wrap:balance;margin:0;letter-spacing:.01em}
+h2{font-size:clamp(1.6rem,3.2vw,2.2rem);line-height:1.15}
+p{margin:0}
+a{color:var(--river)}
+:focus-visible{outline:2px solid var(--brass);outline-offset:3px;border-radius:4px}
+.eyebrow{font:500 .74rem/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--brass)}
+
+/* top bar */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:color-mix(in srgb,var(--stone) 88%,transparent);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-block:12px}
+.brand{font-family:var(--display);font-size:1.15rem}
+.brand small{font:500 .7rem var(--mono);letter-spacing:.12em;color:var(--muted);margin-left:8px;text-transform:uppercase}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;font:700 .95rem var(--body);cursor:pointer;text-decoration:none;background:var(--river);color:var(--river-ink);transition:transform .15s}
+.btn:hover{transform:translateY(-1px)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.top-actions{display:flex;gap:8px}
+@media (max-width:520px){.wa-quick span{display:none}.wa-quick{padding:10px 12px}}
+.btn[aria-disabled="true"]{opacity:.45;pointer-events:none}
+
+/* hero */
+.hero{position:relative;background:var(--sky);border-bottom:1px solid var(--line);overflow:hidden}
+.hero canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hero-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;max-width:none}
+.hero:has(.hero-img)::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--sky) 0%,color-mix(in srgb,var(--sky) 88%,transparent) 45%,color-mix(in srgb,var(--sky) 15%,transparent) 100%)}
+@media (max-width:720px){.hero:has(.hero-img)::after{background:color-mix(in srgb,var(--sky) 82%,transparent)}}
+.hero .wrap{z-index:1;position:relative;padding-block:72px 48px;display:grid;gap:22px}
+.hero h1{font-size:clamp(2.3rem,6vw,4.4rem);line-height:1.02;max-width:13ch}
+.hero .lede{max-width:46ch;font-size:1.1rem;color:var(--muted)}
+.coords{font:400 .78rem var(--mono);color:var(--muted);letter-spacing:.06em}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.chip{font:500 .85rem var(--body);background:var(--paper);border:1px solid var(--line);border-radius:999px;padding:6px 14px}
+.chip b{color:var(--brass)}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+
+section{padding-block:64px}
+section + section, #details > section, #details + section{border-top:1px solid var(--line)}
+.head{display:grid;gap:10px;margin-bottom:28px;max-width:60ch}
+.head p{color:var(--muted)}
+
+/* gallery */
+.gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(150px,200px);gap:10px}
+.ph{position:relative;border-radius:10px;overflow:hidden;background:repeating-linear-gradient(135deg,var(--paper) 0 12px,var(--sky) 12px 24px);border:1px dashed var(--line);display:flex;align-items:flex-end;padding:12px}
+.ph:has(img){border-style:solid}
+.gallery .ph:first-child{grid-row:span 2;grid-column:span 2}
+.ph span{font:500 .75rem var(--mono);letter-spacing:.08em;text-transform:uppercase;background:var(--paper);padding:4px 8px;border-radius:4px;color:var(--muted)}
+.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:1}
+.ph span{position:relative;z-index:2}
+
+/* two-column info */
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:40px}
+.cols > *{min-width:0}
+ul.amen{list-style:none;padding:0;margin:0;display:grid;gap:0}
+ul.amen li{display:flex;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
+ul.amen li em{font-style:normal;font:400 .8rem var(--mono);color:var(--muted)}
+.scores{display:grid;gap:12px}
+.score{display:grid;grid-template-columns:9rem 1fr 2.5rem;align-items:center;gap:12px;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--river)}
+.score b{font:500 .9rem var(--mono);text-align:right}
+.big{display:flex;align-items:baseline;gap:12px;margin-bottom:18px}
+.big strong{font:400 3.4rem/1 var(--display)}
+.big span{color:var(--muted)}
+
+/* host */
+.host{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+.mono-av{width:72px;height:72px;border-radius:50%;background:var(--river);color:var(--river-ink);display:grid;place-items:center;font:400 1.8rem var(--display)}
+.host dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:14px 0 0;font-size:.95rem}
+.host dt{color:var(--muted)}
+.host dd{margin:0}
+.note{margin-top:20px;padding:14px 16px;border-left:3px solid var(--brass);background:var(--paper);border-radius:0 8px 8px 0;font-size:.95rem}
+
+/* booking */
+#reserver{background:var(--paper)}
+.book{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:40px;align-items:start}
+.book > *{min-width:0}
+.why{display:grid;gap:18px;margin-top:22px}
+.why div{display:grid;gap:2px}
+.why b{font-weight:700}
+.why p{color:var(--muted);font-size:.95rem}
+form{background:var(--stone);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:16px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:460px){.row{grid-template-columns:1fr}}
+label{display:grid;gap:6px;font:500 .78rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+input,select,textarea{font:400 1rem var(--body);color:var(--ink);background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:11px 12px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.summary{display:flex;justify-content:space-between;gap:12px;padding:14px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.summary span{color:var(--muted)}
+.err{color:#B3261E;font-size:.9rem;min-height:1.2em}
+:root:not([data-theme="light"]) .err{color:#F2B8B5}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .err{color:#B3261E}}
+:root[data-theme="light"] .err{color:#B3261E}
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.contact{font-size:.9rem;color:var(--muted)}
+.contact code{font:500 .95rem var(--mono);color:var(--ink);user-select:all}
+
+/* listing cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,320px),1fr));gap:20px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.card-ph{border:0;border-radius:0;aspect-ratio:4/3;max-width:100%}
+.card-body{padding:20px;display:grid;gap:6px}
+.card h3{font-size:1.5rem}
+.card-tag{color:var(--muted)}
+.card-meta{font:400 .85rem var(--mono);color:var(--muted)}
+.card-meta b{color:var(--brass);font-weight:500}
+.card .actions{margin-top:12px}
+.card-soon{background:transparent;border-style:dashed;justify-content:center}
+.sub{font-size:1.35rem;margin-bottom:16px}
+
+/* availability calendar */
+.cal{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;font:400 1.15rem var(--display);text-transform:capitalize}
+.cal-nav{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--stone);color:var(--ink);font-size:1.2rem;cursor:pointer}
+.cal-nav:disabled{opacity:.35;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-variant-numeric:tabular-nums}
+.cal-dow{font:500 .68rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding-block:4px}
+.cal-day{aspect-ratio:1;max-width:100%;border:0;border-radius:6px;background:transparent;color:var(--ink);font:500 .92rem var(--body);cursor:pointer}
+.cal-day:hover:not(:disabled){background:var(--sky)}
+.cal-day:disabled{cursor:default;color:var(--muted);opacity:.45}
+.cal-day.busy{background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px);color:var(--muted);text-decoration:line-through;opacity:1}
+.cal-day.in-range{background:color-mix(in srgb,var(--river) 22%,transparent)}
+.cal-day.edge{background:var(--river);color:var(--river-ink)}
+.cal-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.sw-busy{background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px)}
+.sw-sel{background:var(--river);border-color:var(--river)}
+.cal-note{font-size:.85rem;color:var(--muted)}
+.card-price{margin-top:4px}
+.card-price strong{font:400 1.4rem var(--display);color:var(--ink)}
+.fee{font:400 .8rem var(--mono);color:var(--muted)}
+.summary strong{font:400 1.5rem var(--display)}
+
+footer{padding-block:36px;font-size:.88rem;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+
+@media (max-width:720px){
+  .gallery{grid-template-columns:1fr 1fr;grid-auto-rows:150px}
+  .gallery .ph:first-child{grid-column:span 2;grid-row:span 2}
+  .score{grid-template-columns:7.5rem 1fr 2.5rem}
+  .top .btn{padding:10px 16px}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">25Dayz <small>Constantine</small></div>
+    <div class="top-actions">
+      <a class="btn ghost wa-quick" href="https://wa.me/33622438693?text=Bonjour%2C%20je%20vous%20contacte%20depuis%20le%20site%2025Dayz." target="_blank" rel="noopener" aria-label="Écrire sur WhatsApp"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.4.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.1-.3-.2-.5-.3z"/></svg><span>WhatsApp</span></a>
+      <a class="btn" href="#reserver">Réserver en direct</a>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <canvas id="gorge" aria-hidden="true"></canvas>
+  <img class="hero-img" src="photos/vue/7-panorama.jpg" alt="" onerror="this.remove()">
+  <div class="wrap">
+    <p class="eyebrow">25Dayz · Appartements à Constantine</p>
+    <h1>Constantine, chez un Constantinois</h1>
+    <p class="lede">Je suis né à Constantine et j'aime cette ville passionnément. Avec 25Dayz, je vous accueille dans des appartements choisis avec soin, pour vivre la ville du Rocher comme quelqu'un d'ici.</p>
+    <div class="facts">
+      <span class="chip"><b>★ 4,91</b> · 352 avis voyageurs</span>
+      <span class="chip">Superhôte Airbnb</span>
+      <span class="chip">7 ans d'accueil</span>
+      <span class="chip">Réponse en moins d'une heure</span>
+    </div>
+    <div class="ctas">
+      <a class="btn" href="#appartements">Voir nos appartements</a>
+      <a class="btn ghost" href="#reserver">Réserver en direct</a>
+    </div>
+    <p class="coords">36°21′ N · 6°36′ E · Cirta antique, 640 m d'altitude</p>
+  </div>
+</div>
+
+<main>
+  <section id="appartements">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Nos appartements</p>
+        <h2>Où poser vos valises à Constantine</h2>
+        <p>Chaque logement 25Dayz est tenu personnellement, avec le même niveau d'exigence et d'accueil.</p>
+      </div>
+      <div class="cards" id="cards"></div>
+    </div>
+  </section>
+
+  <div id="details"></div>
+
+  <section>
+    <div class="wrap cols">
+      <div>
+        <div class="head">
+          <p class="eyebrow">Derrière 25Dayz</p>
+          <h2>Adlène, Constantinois et amoureux de sa ville</h2>
+        </div>
+        <div class="host">
+          <div class="mono-av" aria-hidden="true">A</div>
+          <div>
+            <p>Constantine, c'est ma ville. J'y ai grandi entre ses ponts suspendus, ses ruelles de la Souika et ses gorges du Rhumel, et je ne me lasse pas de la regarder. Depuis sept ans, j'accueille des voyageurs pour partager cette passion. 25Dayz est né de là : des appartements où l'on se sent chez soi, tenus par des gens d'ici.</p>
+            <p style="margin-top:12px">Demandez-moi mes adresses : où manger, quel pont traverser au coucher du soleil, quels coins visiter hors des sentiers battus. Hakim, mon co-hôte, est là aussi pour vous accueillir.</p>
+            <dl>
+              <dt>Taux de réponse</dt><dd>100 %</dd>
+              <dt>Délai</dt><dd>Moins d'une heure</dd>
+              <dt>Avis reçus</dt><dd>352 · note moyenne 4,91</dd>
+            </dl>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="head">
+          <p class="eyebrow">Bon à savoir</p>
+          <h2>Avant votre arrivée</h2>
+        </div>
+        <ul class="amen">
+          <li>Arrivée <em>Note moyenne 4,9</em></li>
+          <li>Réponse à vos messages <em>Moins d'une heure</em></li>
+          <li>Situation <em>Constantine, Algérie</em></li>
+        </ul>
+        <p class="note">Pour tous nos logements, une copie du passeport est demandée avant votre arrivée.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="reserver">
+    <div class="wrap book">
+      <div>
+        <div class="head">
+          <p class="eyebrow">Réservation directe</p>
+          <h2>Écrivez directement à votre hôte</h2>
+          <p>Choisissez votre logement et vos dates : nous vous confirmons la disponibilité et le prix, en général en moins d'une heure.</p>
+        </div>
+        <div class="why">
+          <div><b>Sans frais de service plateforme</b><p>Vous réglez directement l'hôte, au tarif convenu ensemble.</p></div>
+          <div><b>Un interlocuteur unique</b><p>Questions, horaires d'arrivée, demandes particulières : tout se règle directement avec nous.</p></div>
+          <div><b>Vous préférez passer par Airbnb ?</b><p><a id="abnb" href="https://www.airbnb.com/rooms/1040826756643286264" target="_blank" rel="noopener">Voir l'annonce sur Airbnb</a></p></div>
+        </div>
+      </div>
+
+      <form id="f" novalidate>
+        <label for="apt">Logement<select id="apt"></select></label>
+        <div class="cal" id="cal" aria-label="Calendrier des disponibilités">
+          <div class="cal-head">
+            <button type="button" class="cal-nav" id="calPrev" aria-label="Mois précédent">‹</button>
+            <span id="calTitle"></span>
+            <button type="button" class="cal-nav" id="calNext" aria-label="Mois suivant">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <p class="cal-legend"><span><i class="sw sw-free"></i>Libre</span><span><i class="sw sw-busy"></i>Réservé</span><span><i class="sw sw-sel"></i>Votre séjour</span></p>
+          <p class="cal-note" id="calNote">Touchez votre date d'arrivée, puis votre date de départ.</p>
+        </div>
+        <div class="row">
+          <label for="in">Arrivée<input type="date" id="in" required></label>
+          <label for="out">Départ<input type="date" id="out" required></label>
+        </div>
+        <div class="row">
+          <label for="guests">Voyageurs
+            <select id="guests"></select>
+          </label>
+          <label for="name">Votre nom<input id="name" autocomplete="name" placeholder="Prénom Nom" required></label>
+        </div>
+        <label for="phone">Téléphone ou e-mail<input id="phone" autocomplete="tel" placeholder="Pour vous recontacter" required></label>
+        <label for="msg">Message (facultatif)<textarea id="msg" placeholder="Heure d'arrivée, motif du séjour, questions…"></textarea></label>
+        <div class="summary"><div><span id="nightsLbl">Choisissez vos dates</span><br><small id="feeLine" class="fee"></small></div><strong id="total">—</strong></div>
+        <p class="err" id="err" role="alert"></p>
+        <div class="actions">
+          <a class="btn" id="wa" href="#reserver" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>
+          <button class="btn ghost" type="button" id="copy">Copier la demande</button>
+        </div>
+        <p class="contact" id="contact"></p>
+      </form>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>25Dayz · Appartements en location, Constantine, Algérie</span>
+    <span>Adlène & Hakim, vos hôtes à Constantine</span>
+  </div>
+</footer>
+
+<script>
+/* ===== À personnaliser ===== */
+const CONFIG = {
+  whatsapp: "33622438693", // numéro au format international sans + ni espaces, ex. 213550123456
+  email: "",           // adresse affichée aux voyageurs
+  currency: "€"
+};
+/* Un objet par appartement : ajoutez-en un pour chaque nouveau logement */
+const LISTINGS = [
+  {
+    id: "vue",
+    name: "Vue sur la ville",
+    tagline: "La plus belle vue sur Constantine",
+    specs: "1 chambre · lit king · 3 voyageurs",
+    rating: "4,91 · 94 avis",
+    maxGuests: 3,
+    nightlyPrice: 39,     // prix direct par nuit
+    cleaningFee: 30,      // frais de ménage, une fois par séjour
+    airbnb: "https://www.airbnb.com/rooms/1040826756643286264",
+    availability: "availability/vue.json",  // mis à jour chaque heure depuis l'iCal Airbnb
+    host: "Adlène",
+    headline: "Un séjour au-dessus de la ville",
+    intro: "1 chambre avec lit king size, 1 salle de bain, jusqu'à 3 voyageurs. La plus belle vue sur Constantine depuis vos fenêtres.",
+    amenities: [["Cuisine équipée","Repas maison"],["Wi-Fi","Inclus"],["Espace de travail dédié","Télétravail"],["Parking gratuit dans la rue","Gratuit"],["Télévision","Séjour"],["36 équipements au total","Liste sur demande"]],
+    reviews: { score: "4,91", count: 94, detail: [["Propreté",4.9],["Exactitude",5.0],["Arrivée",4.9],["Communication",5.0],["Emplacement",4.7],["Qualité-prix",4.8]] },
+    /* Photos : déposez les fichiers dans photos/vue/ avec ces noms. La 1re sert aussi de couverture. */
+    photos: [
+      { src: "photos/vue/2-sejour.jpg",         label: "Séjour" },
+      { src: "photos/vue/1-vue.jpg",            label: "La vue depuis la fenêtre" },
+      { src: "photos/vue/3-chambre.jpg",        label: "Chambre · lit king" },
+      { src: "photos/vue/4-coin-the.jpg",       label: "Coin thé face à la ville" },
+      { src: "photos/vue/5-cuisine.jpg",        label: "Cuisine équipée" },
+      { src: "photos/vue/6-salle-de-bain.jpg",  label: "Salle de douche" },
+      { src: "photos/vue/7-panorama.jpg",       label: "Panorama sur Constantine" },
+      { src: "photos/vue/8-salle-a-manger.jpg", label: "Salle à manger" },
+      { src: "photos/vue/9-bureau.jpg",         label: "Espace de travail" }
+    ]
+  },
+  {
+    id: "standing",
+    name: "Haut standing",
+    tagline: "2 chambres en étage élevé, vue sur la ville",
+    specs: "2 chambres · 3 lits · 4 voyageurs",
+    rating: "4,94 · 48 avis",
+    maxGuests: 4,
+    nightlyPrice: null,   // à définir
+    cleaningFee: null,
+    airbnb: "https://www.airbnb.com/rooms/1440102580229534066",
+    host: "Oualid",
+    headline: "L'appartement haut standing",
+    intro: "2 chambres, 3 lits, 1 salle de bain, jusqu'à 4 voyageurs. Étage élevé avec vue sur la ville, parking privé au sous-sol, proche de l'aéroport, du tramway et des transports.",
+    amenities: [["Cuisine équipée","Repas maison"],["Wi-Fi","Inclus"],["Espace de travail dédié","Télétravail"],["Parking gratuit sur place","Sous-sol"],["Télévision","Séjour"],["42 équipements au total","Liste sur demande"]],
+    reviews: { score: "4,94", count: 48, detail: [["Propreté",5.0],["Exactitude",5.0],["Arrivée",5.0],["Communication",5.0],["Emplacement",4.8],["Qualité-prix",4.9]] },
+    /* TEST : photos chargées depuis Airbnb. À remplacer par les fichiers originaux dans photos/standing/ */
+    photos: [
+      { src: "https://a0.muscache.com/im/pictures/miso/Hosting-1440102580229534066/original/ce6290b2-78b8-4fc6-8f34-b16df1016460.jpeg?im_w=1200", label: "Séjour" },
+      { src: "https://a0.muscache.com/im/pictures/miso/Hosting-1440102580229534066/original/2113ba49-3f62-4d09-9fab-a22d0afed8ab.jpeg?im_w=720", label: "Photo 2" },
+      { src: "https://a0.muscache.com/im/pictures/miso/Hosting-1440102580229534066/original/465c4a73-baeb-4b52-96f7-05833b0e282c.jpeg?im_w=720", label: "Photo 3" },
+      { src: "https://a0.muscache.com/im/pictures/miso/Hosting-1440102580229534066/original/2b7f0a22-43c6-4a45-911c-60a3195ddcc1.jpeg?im_w=720", label: "Photo 4" },
+      { src: "https://a0.muscache.com/im/pictures/miso/Hosting-1440102580229534066/original/82881aff-f455-40a4-b508-23ba6368f9a3.jpeg?im_w=720", label: "Photo 5" }
+    ]
+  }
+];
+/* =========================== */
+
+const $ = id => document.getElementById(id);
+const fmt = n => n.toLocaleString("fr-FR");
+const today = new Date(); today.setHours(0,0,0,0);
+const iso = d => d.toISOString().slice(0,10);
+$("in").min = iso(today); $("out").min = iso(new Date(today.getTime()+864e5));
+
+function nights(){
+  const a = $("in").valueAsDate, b = $("out").valueAsDate;
+  if(!a || !b) return 0;
+  return Math.round((b - a) / 864e5);
+}
+function frDate(v){ return v ? new Date(v+"T12:00").toLocaleDateString("fr-FR",{weekday:"short",day:"numeric",month:"long",year:"numeric"}) : ""; }
+
+const cur = () => LISTINGS.find(l => l.id === $("apt").value) || LISTINGS[0];
+const stayTotal = n => n * (cur().nightlyPrice || 0) + (cur().cleaningFee || 0);
+
+/* photo slot: shows the image if the file exists, the labelled placeholder otherwise */
+const slot = (p, extra="") => `<div class="ph ${extra}"><span>${p.label}</span>${p.src ? `<img src="${p.src}" alt="${p.label}" loading="lazy" onerror="this.remove()">` : ""}</div>`;
+/* one detail section per apartment */
+$("details").innerHTML = LISTINGS.map(l => `
+  <section id="${l.id}">
+    <div class="wrap">
+      <div class="head">
+        <p class="eyebrow">Appartement · ${l.name}${l.host ? ` · Hôte : ${l.host}` : ""}</p>
+        <h2>${l.headline || l.name}</h2>
+        <p>${l.intro || ""}</p>
+      </div>
+      <div class="gallery" data-gallery="${l.id}"></div>
+    </div>
+    <div class="wrap cols" style="margin-top:48px">
+      <div>
+        <h3 class="sub">Équipements</h3>
+        <ul class="amen">${(l.amenities||[]).map(([a,n]) => `<li>${a} <em>${n}</em></li>`).join("")}</ul>
+      </div>
+      ${l.reviews ? `<div>
+        <h3 class="sub">Avis voyageurs</h3>
+        <div class="big"><strong>${l.reviews.score}</strong><span>sur 5 · ${l.reviews.count} avis vérifiés sur Airbnb</span></div>
+        <div class="scores">${l.reviews.detail.map(([k,v]) => `<div class="score"><span>${k}</span><div class="bar"><i style="width:${v/5*100}%"></i></div><b>${v.toFixed(1).replace(".",",")}</b></div>`).join("")}</div>
+      </div>` : ""}
+    </div>
+  </section>`).join("");
+
+document.querySelectorAll("[data-gallery]").forEach(g => {
+  const l = LISTINGS.find(x => x.id === g.dataset.gallery);
+  if (l) g.innerHTML = (l.photos || []).slice(0,9).map(p => slot(p)).join("");
+});
+
+/* listing cards + selects */
+$("cards").innerHTML = LISTINGS.map(l => `
+  <article class="card">
+    ${slot((l.photos && l.photos[0]) || {label:l.name}, "card-ph")}
+    <div class="card-body">
+      <h3>${l.name}</h3>
+      <p class="card-tag">${l.tagline}</p>
+      <p class="card-meta">${l.specs}</p>
+      <p class="card-meta"><b>★ ${l.rating}</b></p>
+      ${l.nightlyPrice ? `<p class="card-price"><strong>${l.nightlyPrice} ${CONFIG.currency}</strong> / nuit${l.cleaningFee ? ` · ménage ${l.cleaningFee} ${CONFIG.currency}` : ""}</p>` : ""}
+      <div class="actions">
+        <a class="btn" href="#reserver" data-book="${l.id}">Réserver en direct</a>
+        <a class="btn ghost" href="#${l.id}">Découvrir</a>
+      </div>
+    </div>
+  </article>`).join("") + `
+  <article class="card card-soon">
+    <div class="card-body">
+      <p class="eyebrow">Bientôt</p>
+      <h3>De nouveaux appartements arrivent</h3>
+      <p class="card-tag">25Dayz s'agrandit à Constantine. Écrivez-nous pour être prévenu en premier.</p>
+    </div>
+  </article>`;
+$("apt").innerHTML = LISTINGS.map(l => `<option value="${l.id}">${l.name}</option>`).join("");
+function fillGuests(){
+  const keep = $("guests").value || "2";
+  $("guests").innerHTML = Array.from({length: cur().maxGuests}, (_,i) => `<option${String(i+1)===keep?" selected":""}>${i+1}</option>`).join("");
+  $("abnb").href = cur().airbnb;
+}
+fillGuests();
+$("apt").addEventListener("change", async () => { fillGuests(); await loadAvailability(cur()); update(); });
+document.querySelectorAll("[data-book]").forEach(a => a.addEventListener("click", async () => { $("apt").value = a.dataset.book; fillGuests(); await loadAvailability(cur()); update(); }));
+
+function message(){
+  const n = nights();
+  const price = cur().nightlyPrice;
+  let t = `Bonjour, je souhaite réserver en direct chez 25Dayz à Constantine.\n\n`
+    + `Logement : ${cur().name}\n`
+    + `Arrivée : ${frDate($("in").value)}\nDépart : ${frDate($("out").value)}\n`
+    + `Nuits : ${n}\nVoyageurs : ${$("guests").value}\n`
+    + `Nom : ${$("name").value.trim()}\nContact : ${$("phone").value.trim()}`;
+  if (price && n > 0) t += `\nTarif direct : ${n} × ${price} ${CONFIG.currency}${cur().cleaningFee ? ` + ménage ${cur().cleaningFee} ${CONFIG.currency}` : ""} = ${fmt(stayTotal(n))} ${CONFIG.currency}`;
+  if ($("msg").value.trim()) t += `\n\nMessage : ${$("msg").value.trim()}`;
+  return t;
+}
+/* ---------- availability ---------- */
+const AVAIL = {};          // listing id -> {updated, booked:Set of "YYYY-MM-DD" nights}
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parseKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y, m-1, d); };
+function bookedSet(){ return (AVAIL[cur().id] && AVAIL[cur().id].booked) || new Set(); }
+async function loadAvailability(l){
+  if (!l.availability || AVAIL[l.id]) return;
+  try {
+    const r = await fetch(l.availability + "?t=" + Date.now(), {cache:"no-store"});
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    const set = new Set();
+    (j.booked || []).forEach(([s,e]) => { for (let d = parseKey(s); d < parseKey(e); d.setDate(d.getDate()+1)) set.add(dkey(d)); });
+    AVAIL[l.id] = {updated: j.updated, booked: set};
+  } catch { AVAIL[l.id] = {updated: null, booked: new Set()}; }
+}
+function firstBookedNight(a, b){
+  const set = bookedSet();
+  for (let d = parseKey(a); d < parseKey(b); d.setDate(d.getDate()+1)) if (set.has(dkey(d))) return dkey(d);
+  return null;
+}
+
+let view = new Date(today.getFullYear(), today.getMonth(), 1);
+function renderCal(){
+  const set = bookedSet(), a = $("in").value, b = $("out").value;
+  $("calTitle").textContent = view.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+  $("calPrev").disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+  const first = (new Date(view).getDay() + 6) % 7, days = new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+  let h = ["lun","mar","mer","jeu","ven","sam","dim"].map(d => `<span class="cal-dow">${d}</span>`).join("");
+  for (let i=0;i<first;i++) h += "<span></span>";
+  for (let i=1;i<=days;i++){
+    const d = new Date(view.getFullYear(), view.getMonth(), i), k = dkey(d);
+    const past = d < today, busy = set.has(k);
+    let cls = "cal-day";
+    if (busy) cls += " busy";
+    if (a && b && k > a && k < b) cls += " in-range";
+    if (k === a || k === b) cls += " edge";
+    // a booked night can still be a departure day
+    const canDepart = a && !b && k > a && !firstBookedNight(a, k);
+    const disabled = past || (busy && !canDepart);
+    h += `<button type="button" class="${cls}" data-k="${k}" ${disabled?"disabled":""} aria-label="${d.toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}${busy?" (réservé)":""}">${i}</button>`;
+  }
+  $("calGrid").innerHTML = h;
+  const av = AVAIL[cur().id];
+  let note = !a ? "Touchez votre date d'arrivée, puis votre date de départ." : (!b ? "Touchez maintenant votre date de départ." : "Séjour sélectionné. Touchez une date pour recommencer.");
+  if (av && av.updated){
+    const mins = Math.round((Date.now() - new Date(av.updated)) / 6e4);
+    note += ` Disponibilités mises à jour ${mins < 60 ? `il y a ${Math.max(1,mins)} min` : mins < 1440 ? `il y a ${Math.round(mins/60)} h` : "récemment"}.`;
+  }
+  $("calNote").textContent = note;
+}
+$("calGrid").addEventListener("click", e => {
+  const k = e.target.closest("[data-k]")?.dataset.k; if (!k) return;
+  const a = $("in").value;
+  if (!a || $("out").value || k <= a){ $("in").value = k; $("out").value = ""; }
+  else $("out").value = k;
+  $("err").textContent = "";
+  update();
+});
+$("calPrev").addEventListener("click", () => { view.setMonth(view.getMonth()-1); renderCal(); });
+$("calNext").addEventListener("click", () => { view.setMonth(view.getMonth()+1); renderCal(); });
+
+function problem(){
+  const n = nights();
+  if(!$("in").value || !$("out").value) return "Choisissez vos dates d'arrivée et de départ.";
+  if(n <= 0) return "La date de départ doit suivre la date d'arrivée.";
+  const clash = firstBookedNight($("in").value, $("out").value);
+  if (clash) return `Ces dates ne sont pas disponibles : la nuit du ${frDate(clash)} est déjà réservée. Choisissez d'autres dates ou écrivez-nous.`;
+  if(!$("name").value.trim()) return "Indiquez votre nom.";
+  if(!$("phone").value.trim()) return "Indiquez un téléphone ou un e-mail pour vous recontacter.";
+  return "";
+}
+function update(){
+  const n = nights();
+  $("nightsLbl").textContent = n > 0 ? `${n} nuit${n>1?"s":""} · ${$("guests").value} voyageur${$("guests").value>1?"s":""}` : "Choisissez vos dates";
+  const price = cur().nightlyPrice;
+  $("total").textContent = n > 0 ? (price ? `${fmt(stayTotal(n))} ${CONFIG.currency}` : "Prix sur confirmation") : (price ? `${price} ${CONFIG.currency} / nuit` : "—");
+  $("feeLine").textContent = price ? `${n > 0 ? n : "x"} nuit${n>1?"s":""} × ${price} ${CONFIG.currency}${cur().cleaningFee ? ` + ménage ${cur().cleaningFee} ${CONFIG.currency}` : ""}` : "";
+  const p = problem();
+  const wa = $("wa");
+  if (CONFIG.whatsapp && !p){
+    wa.href = `https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(message())}`;
+    wa.removeAttribute("aria-disabled");
+  } else {
+    wa.href = "#reserver";
+    if (!CONFIG.whatsapp) wa.setAttribute("aria-disabled","true");
+  }
+  const clash = $("in").value && $("out").value && firstBookedNight($("in").value, $("out").value);
+  if (clash) $("err").textContent = p;
+  else if ($("err").textContent.startsWith("Ces dates")) $("err").textContent = "";
+  if ($("in").value){ const d = parseKey($("in").value); if (!$("out").value && (d.getFullYear() !== view.getFullYear() || d.getMonth() !== view.getMonth())) view = new Date(d.getFullYear(), d.getMonth(), 1); }
+  renderCal();
+}
+["in","out","guests","name","phone","msg"].forEach(id => $(id).addEventListener("input", update));
+$("in").addEventListener("change", () => {
+  if ($("in").value){ const d = new Date($("in").value+"T12:00"); d.setDate(d.getDate()+1); $("out").min = d.toISOString().slice(0,10); }
+  update();
+});
+$("wa").addEventListener("click", e => {
+  const p = problem();
+  if (p){ e.preventDefault(); $("err").textContent = p; } else $("err").textContent = "";
+});
+$("copy").addEventListener("click", async () => {
+  const p = problem();
+  if (p){ $("err").textContent = p; return; }
+  $("err").textContent = "";
+  try { await navigator.clipboard.writeText(message()); $("copy").textContent = "Demande copiée"; }
+  catch { $("msg").value = message(); $("msg").select(); $("copy").textContent = "Texte sélectionné, copiez-le"; }
+  setTimeout(() => $("copy").textContent = "Copier la demande", 2500);
+});
+$("f").addEventListener("submit", e => e.preventDefault());
+
+(function contact(){
+  const bits = [];
+  if (CONFIG.whatsapp) bits.push(`WhatsApp : <code>+${CONFIG.whatsapp.replace(/^33(\d)(\d{2})(\d{2})(\d{2})(\d{2})$/, "33 $1 $2 $3 $4 $5")}</code>`);
+  if (CONFIG.email) bits.push(`E-mail : <code>${CONFIG.email}</code>`);
+  $("contact").innerHTML = bits.length ? bits.join(" · ") : "Coordonnées de l'hôte bientôt disponibles.";
+})();
+update();
+loadAvailability(cur()).then(update);
+
+/* Hero: the Rhumel gorge with a suspension bridge, drawn from theme tokens */
+(function(){
+  const c = $("gorge"), ctx = c.getContext("2d");
+  function draw(){
+    const s = getComputedStyle(document.documentElement);
+    const col = k => s.getPropertyValue(k).trim();
+    const r = c.getBoundingClientRect(), dpr = Math.min(devicePixelRatio||1, 2);
+    c.width = r.width*dpr; c.height = r.height*dpr; ctx.setTransform(dpr,0,0,dpr,0,0);
+    const W = r.width, H = r.height;
+    ctx.clearRect(0,0,W,H);
+    const gx = W*0.62, gw = Math.max(60, W*0.09);
+    const lip = H*0.42;
+    // rock walls
+    ctx.fillStyle = col("--line");
+    ctx.beginPath(); ctx.moveTo(gx - gw*2.6, H); ctx.lineTo(gx - gw*2.6, lip);
+    let x = gx - gw*2.6;
+    for (let i=0;i<10;i++){ x += gw*0.21; ctx.lineTo(x, lip + (i%2?8:0) + i*i*1.2); }
+    ctx.lineTo(gx - gw*0.5, H); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(W, H); ctx.lineTo(W, lip-10);
+    x = gx + gw*0.5 + gw*2.4;
+    ctx.lineTo(x, lip-10);
+    for (let i=0;i<10;i++){ x -= gw*0.24; ctx.lineTo(x, lip + (i%2?6:0) + (10-i)*(10-i)*0.2 + i*i*1.1); }
+    ctx.lineTo(gx + gw*0.5, H); ctx.closePath(); ctx.fill();
+    // houses on the rock
+    ctx.fillStyle = col("--paper");
+    for (let i=0;i<14;i++){
+      const hx = gx + gw*0.7 + i*((W-gx)/14), hw = 18 + (i*7)%16, hh = 14 + (i*11)%26;
+      if (hx > W) break; ctx.fillRect(hx, lip-10-hh, hw, hh);
+    }
+    for (let i=0;i<8;i++){
+      const hx = gx - gw*2.5 + i*gw*0.26, hw = 14+(i*5)%10, hh = 10+(i*9)%18;
+      ctx.fillRect(hx, lip-hh+i*i*0.6, hw, hh);
+    }
+    // bridge deck + cables
+    const L = gx - gw*1.1, R = gx + gw*1.6, deck = lip + 6;
+    ctx.strokeStyle = col("--river"); ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(L-10, deck); ctx.lineTo(R+10, deck); ctx.stroke();
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(L, deck-34);
+    ctx.quadraticCurveTo((L+R)/2, deck+26, R, deck-34); ctx.stroke();
+    ctx.lineWidth = 3; [L,R].forEach(px => { ctx.beginPath(); ctx.moveTo(px, deck+4); ctx.lineTo(px, deck-36); ctx.stroke(); });
+    ctx.lineWidth = .8;
+    for (let t=0.08;t<0.95;t+=0.07){
+      const px = L + (R-L)*t, py = (1-t)*(1-t)*(deck-34) + 2*(1-t)*t*(deck+26) + t*t*(deck-34);
+      ctx.beginPath(); ctx.moveTo(px, py); ctx.lineTo(px, deck); ctx.stroke();
+    }
+    // river
+    ctx.strokeStyle = col("--brass"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(gx-gw*0.4, H); ctx.quadraticCurveTo(gx+gw*0.2, H-30, gx+gw*0.1, H-60); ctx.stroke();
+    // veil so text stays readable on narrow screens
+    if (W < 720){ ctx.fillStyle = col("--sky"); ctx.globalAlpha = .7; ctx.fillRect(0,0,W,H); ctx.globalAlpha = 1; }
+    else { const g = ctx.createLinearGradient(0,0,W*0.6,0); g.addColorStop(0,col("--sky")); g.addColorStop(.75,col("--sky")); g.addColorStop(1,"rgba(0,0,0,0)"); ctx.globalAlpha=.85; ctx.fillStyle=g; ctx.fillRect(0,0,W*0.6,H); ctx.globalAlpha=1; }
+  }
+  draw();
+  addEventListener("resize", draw);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", draw);
+  new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:["data-theme"]});
+})();
+</script>
+
+</body>
+</html>
