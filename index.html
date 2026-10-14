@@ -138,6 +138,26 @@ textarea{min-height:90px;resize:vertical}
 .card .actions{margin-top:12px}
 .card-soon{background:transparent;border-style:dashed;justify-content:center}
 .sub{font-size:1.35rem;margin-bottom:16px}
+
+/* availability calendar */
+.cal{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:14px;display:grid;gap:10px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;font:400 1.15rem var(--display);text-transform:capitalize}
+.cal-nav{width:36px;height:36px;border-radius:50%;border:1px solid var(--line);background:var(--stone);color:var(--ink);font-size:1.2rem;cursor:pointer}
+.cal-nav:disabled{opacity:.35;cursor:default}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;font-variant-numeric:tabular-nums}
+.cal-dow{font:500 .68rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);text-align:center;padding-block:4px}
+.cal-day{aspect-ratio:1;max-width:100%;border:0;border-radius:6px;background:transparent;color:var(--ink);font:500 .92rem var(--body);cursor:pointer}
+.cal-day:hover:not(:disabled){background:var(--sky)}
+.cal-day:disabled{cursor:default;color:var(--muted);opacity:.45}
+.cal-day.busy{background:repeating-linear-gradient(135deg,var(--line) 0 4px,transparent 4px 8px);color:var(--muted);text-decoration:line-through;opacity:1}
+.cal-day.in-range{background:color-mix(in srgb,var(--river) 22%,transparent)}
+.cal-day.edge{background:var(--river);color:var(--river-ink)}
+.cal-legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
+.cal-legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.sw-busy{background:repeating-linear-gradient(135deg,var(--line) 0 3px,transparent 3px 6px)}
+.sw-sel{background:var(--river);border-color:var(--river)}
+.cal-note{font-size:.85rem;color:var(--muted)}
 .card-price{margin-top:4px}
 .card-price strong{font:400 1.4rem var(--display);color:var(--ink)}
 .fee{font:400 .8rem var(--mono);color:var(--muted)}
@@ -288,6 +308,16 @@ footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
 
       <form id="f" novalidate>
         <label for="apt">Logement<select id="apt"></select></label>
+        <div class="cal" id="cal" aria-label="Calendrier des disponibilités">
+          <div class="cal-head">
+            <button type="button" class="cal-nav" id="calPrev" aria-label="Mois précédent">‹</button>
+            <span id="calTitle"></span>
+            <button type="button" class="cal-nav" id="calNext" aria-label="Mois suivant">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <p class="cal-legend"><span><i class="sw sw-free"></i>Libre</span><span><i class="sw sw-busy"></i>Réservé</span><span><i class="sw sw-sel"></i>Votre séjour</span></p>
+          <p class="cal-note" id="calNote">Touchez votre date d'arrivée, puis votre date de départ.</p>
+        </div>
         <div class="row">
           <label for="in">Arrivée<input type="date" id="in" required></label>
           <label for="out">Départ<input type="date" id="out" required></label>
@@ -338,6 +368,7 @@ const LISTINGS = [
     nightlyPrice: 39,     // prix direct par nuit
     cleaningFee: 30,      // frais de ménage, une fois par séjour
     airbnb: "https://www.airbnb.com/rooms/1040826756643286264",
+    availability: "availability/vue.json",  // mis à jour chaque heure depuis l'iCal Airbnb
     /* Photos : déposez les fichiers dans photos/vue/ avec ces noms. La 1re sert aussi de couverture. */
     photos: [
       { src: "photos/vue/2-sejour.jpg",         label: "Séjour" },
@@ -407,8 +438,8 @@ function fillGuests(){
   $("abnb").href = cur().airbnb;
 }
 fillGuests();
-$("apt").addEventListener("change", () => { fillGuests(); update(); });
-document.querySelectorAll("[data-book]").forEach(a => a.addEventListener("click", () => { $("apt").value = a.dataset.book; fillGuests(); update(); }));
+$("apt").addEventListener("change", async () => { fillGuests(); await loadAvailability(cur()); update(); });
+document.querySelectorAll("[data-book]").forEach(a => a.addEventListener("click", async () => { $("apt").value = a.dataset.book; fillGuests(); await loadAvailability(cur()); update(); }));
 
 function message(){
   const n = nights();
@@ -422,10 +453,74 @@ function message(){
   if ($("msg").value.trim()) t += `\n\nMessage : ${$("msg").value.trim()}`;
   return t;
 }
+/* ---------- availability ---------- */
+const AVAIL = {};          // listing id -> {updated, booked:Set of "YYYY-MM-DD" nights}
+const dkey = d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const parseKey = k => { const [y,m,d] = k.split("-").map(Number); return new Date(y, m-1, d); };
+function bookedSet(){ return (AVAIL[cur().id] && AVAIL[cur().id].booked) || new Set(); }
+async function loadAvailability(l){
+  if (!l.availability || AVAIL[l.id]) return;
+  try {
+    const r = await fetch(l.availability + "?t=" + Date.now(), {cache:"no-store"});
+    if (!r.ok) throw 0;
+    const j = await r.json();
+    const set = new Set();
+    (j.booked || []).forEach(([s,e]) => { for (let d = parseKey(s); d < parseKey(e); d.setDate(d.getDate()+1)) set.add(dkey(d)); });
+    AVAIL[l.id] = {updated: j.updated, booked: set};
+  } catch { AVAIL[l.id] = {updated: null, booked: new Set()}; }
+}
+function firstBookedNight(a, b){
+  const set = bookedSet();
+  for (let d = parseKey(a); d < parseKey(b); d.setDate(d.getDate()+1)) if (set.has(dkey(d))) return dkey(d);
+  return null;
+}
+
+let view = new Date(today.getFullYear(), today.getMonth(), 1);
+function renderCal(){
+  const set = bookedSet(), a = $("in").value, b = $("out").value;
+  $("calTitle").textContent = view.toLocaleDateString("fr-FR",{month:"long",year:"numeric"});
+  $("calPrev").disabled = view <= new Date(today.getFullYear(), today.getMonth(), 1);
+  const first = (new Date(view).getDay() + 6) % 7, days = new Date(view.getFullYear(), view.getMonth()+1, 0).getDate();
+  let h = ["lun","mar","mer","jeu","ven","sam","dim"].map(d => `<span class="cal-dow">${d}</span>`).join("");
+  for (let i=0;i<first;i++) h += "<span></span>";
+  for (let i=1;i<=days;i++){
+    const d = new Date(view.getFullYear(), view.getMonth(), i), k = dkey(d);
+    const past = d < today, busy = set.has(k);
+    let cls = "cal-day";
+    if (busy) cls += " busy";
+    if (a && b && k > a && k < b) cls += " in-range";
+    if (k === a || k === b) cls += " edge";
+    // a booked night can still be a departure day
+    const canDepart = a && !b && k > a && !firstBookedNight(a, k);
+    const disabled = past || (busy && !canDepart);
+    h += `<button type="button" class="${cls}" data-k="${k}" ${disabled?"disabled":""} aria-label="${d.toLocaleDateString("fr-FR",{day:"numeric",month:"long"})}${busy?" (réservé)":""}">${i}</button>`;
+  }
+  $("calGrid").innerHTML = h;
+  const av = AVAIL[cur().id];
+  let note = !a ? "Touchez votre date d'arrivée, puis votre date de départ." : (!b ? "Touchez maintenant votre date de départ." : "Séjour sélectionné. Touchez une date pour recommencer.");
+  if (av && av.updated){
+    const mins = Math.round((Date.now() - new Date(av.updated)) / 6e4);
+    note += ` Disponibilités mises à jour ${mins < 60 ? `il y a ${Math.max(1,mins)} min` : mins < 1440 ? `il y a ${Math.round(mins/60)} h` : "récemment"}.`;
+  }
+  $("calNote").textContent = note;
+}
+$("calGrid").addEventListener("click", e => {
+  const k = e.target.closest("[data-k]")?.dataset.k; if (!k) return;
+  const a = $("in").value;
+  if (!a || $("out").value || k <= a){ $("in").value = k; $("out").value = ""; }
+  else $("out").value = k;
+  $("err").textContent = "";
+  update();
+});
+$("calPrev").addEventListener("click", () => { view.setMonth(view.getMonth()-1); renderCal(); });
+$("calNext").addEventListener("click", () => { view.setMonth(view.getMonth()+1); renderCal(); });
+
 function problem(){
   const n = nights();
   if(!$("in").value || !$("out").value) return "Choisissez vos dates d'arrivée et de départ.";
   if(n <= 0) return "La date de départ doit suivre la date d'arrivée.";
+  const clash = firstBookedNight($("in").value, $("out").value);
+  if (clash) return `Ces dates ne sont pas disponibles : la nuit du ${frDate(clash)} est déjà réservée. Choisissez d'autres dates ou écrivez-nous.`;
   if(!$("name").value.trim()) return "Indiquez votre nom.";
   if(!$("phone").value.trim()) return "Indiquez un téléphone ou un e-mail pour vous recontacter.";
   return "";
@@ -445,6 +540,11 @@ function update(){
     wa.href = "#reserver";
     if (!CONFIG.whatsapp) wa.setAttribute("aria-disabled","true");
   }
+  const clash = $("in").value && $("out").value && firstBookedNight($("in").value, $("out").value);
+  if (clash) $("err").textContent = p;
+  else if ($("err").textContent.startsWith("Ces dates")) $("err").textContent = "";
+  if ($("in").value){ const d = parseKey($("in").value); if (!$("out").value && (d.getFullYear() !== view.getFullYear() || d.getMonth() !== view.getMonth())) view = new Date(d.getFullYear(), d.getMonth(), 1); }
+  renderCal();
 }
 ["in","out","guests","name","phone","msg"].forEach(id => $(id).addEventListener("input", update));
 $("in").addEventListener("change", () => {
@@ -472,6 +572,7 @@ $("f").addEventListener("submit", e => e.preventDefault());
   $("contact").innerHTML = bits.length ? bits.join(" · ") : "Coordonnées de l'hôte bientôt disponibles.";
 })();
 update();
+loadAvailability(cur()).then(update);
 
 /* Hero: the Rhumel gorge with a suspension bridge, drawn from theme tokens */
 (function(){
