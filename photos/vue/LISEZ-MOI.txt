@@ -1,0 +1,3 @@
+Photos de l'appartement "Vue sur la ville" :
+  1-vue.jpg (couverture), 2-chambre.jpg, 3-sejour.jpg, 4-cuisine.jpg, 5-salle-de-bain.jpg
+JPG, ~1600 px de large, < 500 Ko.
